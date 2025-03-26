@@ -1,6 +1,7 @@
 import express  from 'express'
 import "express-async-errors"
 import morgan from 'morgan'
+import router from './router'
 import { errorHandler } from './modules/errorMiddleware'
 
 
@@ -13,6 +14,8 @@ app.use(express.urlencoded({extended: true}))
 app.get('/health-check', (req, res) => {
   res.send("API is running")
 })
+
+app.use('/api', router)
 
 app.use(errorHandler)
 

@@ -10,6 +10,7 @@ services:
       - /app/node_modules
     environment:
       TEST_DB_URL: postgresql://postgres:password@postgres:5432/testdb
+      NODE_ENV: test
     depends_on:
       - postgres
   postgres:

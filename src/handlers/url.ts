@@ -1,38 +1,51 @@
-import {Request,Response} from "express"
-import { generateShortId, isValidUrlFormat } from "../modules/url-helpers"
-import { client } from "../config/db"
+import { Request, Response } from "express";
+import { generateShortId, isValidUrlFormat } from "../modules/url-helpers";
+import { client } from "../config/db";
 
-const shortenUrl = async (req:Request, res: Response) => {
-  const {long_url} = req.body
+const shortenUrl = async (req: Request, res: Response) => {
+  const { long_url } = req.body;
 
-  if(!long_url){
-    res.status(400)
-    throw new Error('long_url not present')
+  if (!long_url) {
+    res.status(400);
+    throw new Error("long_url not present");
   }
 
-  if(!isValidUrlFormat(long_url)){
-    res.status(400)
-    throw new Error('Invalid Url format')
+  if (!isValidUrlFormat(long_url)) {
+    res.status(400);
+    throw new Error("Invalid Url format");
+  }
+
+  const urlExists = await client.query(
+    "SELECT DISTINCT * FROM URL WHERE original_url=$1",
+    [long_url],
+  );
+
+  if (urlExists.rows.length > 0) {
+    res.status(200).send(urlExists.rows[0]);
+    return;
   }
 
   // Generate shortId
-  const short_code = generateShortId()
+  const short_code = generateShortId();
 
-  const newUrl = await client.query('INSERT INTO URL(original_url, short_code) VALUES ($1, $2) RETURNING *',[long_url, short_code])
+  const newUrl = await client.query(
+    "INSERT INTO URL(original_url, short_code) VALUES ($1, $2) RETURNING *",
+    [long_url, short_code],
+  );
 
-  res.status(201).send(newUrl.rows[0])
-}
+  res.status(201).send(newUrl.rows[0]);
+};
 
-const getLongUrl = (req:Request, res: Response) => {
-  res.send('Shorten URL')
-}
+const getLongUrl = (req: Request, res: Response) => {
+  res.send("Shorten URL");
+};
 
-const getStats = (req:Request, res: Response) => {
-  res.send('Shorten URL')
-}
+const getStats = (req: Request, res: Response) => {
+  res.send("Shorten URL");
+};
 
-const deleteShortUrl = (req:Request, res: Response) => {
-  res.send('Shorten URL')
-}
+const deleteShortUrl = (req: Request, res: Response) => {
+  res.send("Shorten URL");
+};
 
-export {shortenUrl, getLongUrl, getStats, deleteShortUrl }
+export { shortenUrl, getLongUrl, getStats, deleteShortUrl };

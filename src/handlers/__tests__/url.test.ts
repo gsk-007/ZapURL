@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import app from "../../server";
 import request from "supertest";
 
-describe("shotenUrl endpoint tests", () => {
+describe("shortenUrl endpoint tests", () => {
   test("fails when a long url is not provided", async () => {
     await request(app).post("/api/shorten").send({}).expect(400);
   });
@@ -32,7 +32,26 @@ describe("shotenUrl endpoint tests", () => {
       .post("/api/shorten")
       .send(payload)
       .expect(200);
-    console.log(response);
+
     expect(response.body.original_url).toBe(payload.long_url);
   });
 });
+
+describe('get Long url endpoint tests', () => {
+  test('gives a 400 for an invalid shortCode',async () => {
+
+    await request(app).get('/api/abc123').send().expect(400)
+  }) 
+
+  test('give a 302 redirect if shorCode is found',async () => {
+    const payload = { long_url: "https://github.com" };
+
+    const response = await request(app)
+      .post("/api/shorten")
+      .send(payload)
+      .expect(201);
+
+    await request(app).get(`/api/${response.body.short_code}`).send().expect(302)
+  }) 
+})
+

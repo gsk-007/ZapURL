@@ -16,7 +16,7 @@ const shortenUrl = async (req: Request, res: Response) => {
   }
 
   const urlExists = await client.query(
-    "SELECT DISTINCT * FROM URL WHERE original_url=$1",
+    "SELECT DISTINCT short_code,original_url FROM URL WHERE original_url=$1",
     [long_url],
   );
 
@@ -36,7 +36,16 @@ const shortenUrl = async (req: Request, res: Response) => {
   res.status(201).send(newUrl.rows[0]);
 };
 
-const getLongUrl = (req: Request, res: Response) => {
+const getLongUrl = async (req: Request, res: Response) => {
+  const {shortCode} = req.params
+  const urlExists = await client.query("SELECT * FROM URL WHERE short_code=$1",[shortCode])
+
+  if(urlExists.rows.length == 0){
+    res.status(400)
+    throw new Error('Short url does not exist!')
+  }
+
+  res.status(302).redirect(urlExists.rows[0].original_url)
   res.send("Shorten URL");
 };
 

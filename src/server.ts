@@ -2,7 +2,7 @@ import express  from 'express'
 import "express-async-errors"
 import morgan from 'morgan'
 import router from './router'
-import { errorHandler } from './modules/errorMiddleware'
+import { errorHandler, notFound } from './modules/errorMiddleware'
 
 
 const app = express()
@@ -17,6 +17,7 @@ app.get('/health-check', (req, res) => {
 
 app.use('/api', router)
 
+app.use(notFound)
 app.use(errorHandler)
 
 export default app

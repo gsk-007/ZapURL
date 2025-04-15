@@ -5,7 +5,7 @@ const router = Router()
 
 router.post('/shorten', shortenUrl)
 router.get('/:shortCode', getLongUrl)
-router.get('/stats/:shortCode', getStats)
+router.get('/:shortCode/stats', getStats)
 router.delete('/:shortCode', deleteShortUrl)
 
 

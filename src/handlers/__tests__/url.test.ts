@@ -37,13 +37,12 @@ describe("shortenUrl endpoint tests", () => {
   });
 });
 
-describe('get Long url endpoint tests', () => {
-  test('gives a 400 for an invalid shortCode',async () => {
+describe("get Long url endpoint tests", () => {
+  test("gives a 400 for an invalid shortCode", async () => {
+    await request(app).get("/api/abc123").send().expect(400);
+  });
 
-    await request(app).get('/api/abc123').send().expect(400)
-  }) 
-
-  test('give a 302 redirect if shorCode is found',async () => {
+  test("give a 302 redirect if shorCode is found", async () => {
     const payload = { long_url: "https://github.com" };
 
     const response = await request(app)
@@ -51,7 +50,65 @@ describe('get Long url endpoint tests', () => {
       .send(payload)
       .expect(201);
 
-    await request(app).get(`/api/${response.body.short_code}`).send().expect(302)
-  }) 
-})
+    await request(app)
+      .get(`/api/${response.body.short_code}`)
+      .send()
+      .expect(302);
+  });
+});
 
+describe("get url stats endpoint tests", () => {
+  test("gives a 400 for an invalid shortCode", async () => {
+    await request(app).get("/api/abc123/stats").send().expect(400);
+  });
+
+  test("gives a 200 for a valid shortCode", async () => {
+    const payload = { long_url: "https://github.com" };
+
+    const response = await request(app)
+      .post("/api/shorten")
+      .send(payload)
+      .expect(201);
+
+    await request(app)
+      .get(`/api/${response.body.short_code}/stats`)
+      .send()
+      .expect(200);
+  });
+
+  test("give the count of times the url was accessed", async () => {
+    const payload = { long_url: "https://github.com" };
+
+    const response = await request(app)
+      .post("/api/shorten")
+      .send(payload)
+      .expect(201);
+
+    const statsResponse = await request(app)
+      .get(`/api/${response.body.short_code}/stats`)
+      .send()
+      .expect(200);
+
+    expect(statsResponse.body.clicks).toBe(0);
+
+    await request(app)
+      .get(`/api/${response.body.short_code}`)
+      .send()
+      .expect(302);
+    await request(app)
+      .get(`/api/${response.body.short_code}`)
+      .send()
+      .expect(302);
+    await request(app)
+      .get(`/api/${response.body.short_code}`)
+      .send()
+      .expect(302);
+
+    const statsResponse2 = await request(app)
+      .get(`/api/${response.body.short_code}/stats`)
+      .send()
+      .expect(200);
+
+    expect(statsResponse2.body.clicks).toBe(3);
+  });
+});

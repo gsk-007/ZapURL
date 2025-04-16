@@ -112,3 +112,28 @@ describe("get url stats endpoint tests", () => {
     expect(statsResponse2.body.clicks).toBe(3);
   });
 });
+
+describe("delete url endpoint tests", () => {
+  test("gives a 400 for an invalid shortCode", async () => {
+    await request(app).delete("/api/abc123").send().expect(400);
+  });
+
+  test("gives a 204 after deleting a url", async () => {
+    const payload = { long_url: "https://github.com" };
+
+    const response = await request(app)
+      .post("/api/shorten")
+      .send(payload)
+      .expect(201);
+
+    await request(app)
+      .delete(`/api/${response.body.short_code}`)
+      .send()
+      .expect(204);
+
+    await request(app)
+      .get(`/api/${response.body.short_code}`)
+      .send()
+      .expect(400);
+  });
+});

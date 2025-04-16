@@ -71,8 +71,22 @@ const getStats = async (req: Request, res: Response) => {
   res.status(200).json(urlExists.rows[0]);
 };
 
-const deleteShortUrl = (req: Request, res: Response) => {
-  res.send("Shorten URL");
+const deleteShortUrl = async (req: Request, res: Response) => {
+  const { shortCode } = req.params;
+
+  const urlExists = await client.query(
+    "SELECT clicks FROM URL WHERE short_code=$1",
+    [shortCode],
+  );
+
+  if (urlExists.rows.length == 0) {
+    res.status(400);
+    throw new Error("Short url does not exist!");
+  }
+
+  await client.query("DELETE FROM URL WHERE short_code=$1", [shortCode]);
+
+  res.status(204).json({ message: "Url Deleted!" });
 };
 
 export { shortenUrl, getLongUrl, getStats, deleteShortUrl };

@@ -5,8 +5,13 @@ import router from "./router";
 import { errorHandler, notFound } from "./modules/errorMiddleware";
 import { limiter } from "./config/rateLimiting";
 import logger from "./config/logger";
+import { metricsEndpoint, observeRequest } from "./config/metrics";
 
 const app = express();
+
+app.get('/metrics', metricsEndpoint);
+
+app.use(observeRequest);
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
   logger.info(`Incoming request: ${req.method} ${req.url}`);
@@ -20,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(limiter);
 
 app.get("/health-check", (req, res) => {
-  res.send("API is running");
+  res.status(200).send("API is running");
 });
 
 app.use("/api", router);

@@ -18,6 +18,8 @@ A modern, efficient URL shortening service built with Node.js, Express, and Post
 - **Framework**: Express.js
 - **Database**: PostgreSQL 17
 - **Testing**: Vitest
+- **Logging**: Winston
+- **Monitoring**: Prometheus and Grafana
 - **Language**: TypeScript
 - **Development Tools**:
   - Docker & Docker Compose

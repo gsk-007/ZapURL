@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import { generateShortId, isValidUrlFormat } from "../modules/url-helpers";
+import { generateShortId, isUrlBroken, isValidUrlFormat } from "../modules/url-helpers";
 import { client } from "../config/db";
 import { redisClient } from "../config/redis";
+import logger from "../config/logger";
 
 const shortenUrl = async (req: Request, res: Response) => {
   const { long_url } = req.body;
@@ -14,6 +15,11 @@ const shortenUrl = async (req: Request, res: Response) => {
   if (!isValidUrlFormat(long_url)) {
     res.status(400);
     throw new Error("Invalid Url format");
+  }
+
+  if (await isUrlBroken(long_url)) {
+    res.status(400);
+    throw new Error("Invalid Url");
   }
 
   const urlExists = await client.query(
@@ -46,7 +52,7 @@ const getLongUrl = async (req: Request, res: Response) => {
     const cachedUrl = await redisClient.get(shortCode);
 
     if (cachedUrl) {
-      console.log('Cache hit');
+      logger.info('Cache hit');
       await client.query("UPDATE URL SET clicks = clicks + 1 WHERE short_code=$1", [
         shortCode,
       ]);

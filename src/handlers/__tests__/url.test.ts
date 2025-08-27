@@ -14,6 +14,13 @@ describe("shortenUrl endpoint tests", () => {
       .expect(400);
   });
 
+  test("fails when an broken url is provided", async () => {
+    await request(app)
+      .post("/api/shorten")
+      .send({ long_url: "https://httpstat.us/404" })
+      .expect(400);
+  });
+
   test("creates a new short url", async () => {
     const payload = { long_url: "https://github.com" };
     const response = await request(app)

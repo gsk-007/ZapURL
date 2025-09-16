@@ -2,6 +2,7 @@ import fs from "fs";
 import { beforeAll, beforeEach, afterAll } from "vitest";
 import { client } from "../config/db";
 import { redisClient } from "../config/redis";
+import { redisClient } from "../config/redis";
 
 beforeAll(async () => {
   const createTableSql = fs.readFileSync("create-tables.sql", "utf8");

@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { generateShortId, isUrlBroken, isValidUrlFormat } from "../modules/url-helpers";
+import {
+  generateShortId,
+  isUrlBroken,
+  isValidUrlFormat,
+} from "../modules/url-helpers";
 import { client } from "../config/db";
 import { redisClient } from "../config/redis";
 import logger from "../config/logger";
@@ -41,7 +45,11 @@ const shortenUrl = async (req: Request, res: Response) => {
   );
 
   // setting url in cache
-  await redisClient.setex(newUrl.rows[0].short_code, 3600, newUrl.rows[0].original_url);
+  await redisClient.setex(
+    newUrl.rows[0].short_code,
+    3600,
+    newUrl.rows[0].original_url,
+  );
 
   res.status(201).send(newUrl.rows[0]);
 };
@@ -49,16 +57,17 @@ const shortenUrl = async (req: Request, res: Response) => {
 const getLongUrl = async (req: Request, res: Response) => {
   const { shortCode } = req.params;
   // Check cache first
-    const cachedUrl = await redisClient.get(shortCode);
+  const cachedUrl = await redisClient.get(shortCode);
 
-    if (cachedUrl) {
-      logger.info('Cache hit');
-      await client.query("UPDATE URL SET clicks = clicks + 1 WHERE short_code=$1", [
-        shortCode,
-      ]);
-      res.status(302).redirect(cachedUrl); // Redirect without hitting MongoDB
-      return
-    }
+  if (cachedUrl) {
+    logger.info("Cache hit");
+    await client.query(
+      "UPDATE URL SET clicks = clicks + 1 WHERE short_code=$1",
+      [shortCode],
+    );
+    res.status(302).redirect(cachedUrl); // Redirect without hitting MongoDB
+    return;
+  }
 
   const urlExists = await client.query(
     "SELECT * FROM URL WHERE short_code=$1",
@@ -71,7 +80,7 @@ const getLongUrl = async (req: Request, res: Response) => {
   }
 
   // setting short url in cache
-   await redisClient.setex(shortCode, 3600, urlExists.rows[0].original_url);
+  await redisClient.setex(shortCode, 3600, urlExists.rows[0].original_url);
 
   await client.query("UPDATE URL SET clicks = clicks + 1 WHERE short_code=$1", [
     shortCode,
@@ -109,7 +118,7 @@ const deleteShortUrl = async (req: Request, res: Response) => {
     throw new Error("Short url does not exist!");
   }
 
-  await redisClient.del(shortCode)
+  await redisClient.del(shortCode);
 
   await client.query("DELETE FROM URL WHERE short_code=$1", [shortCode]);
 

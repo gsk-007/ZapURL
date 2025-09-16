@@ -9,7 +9,7 @@ import { metricsEndpoint, observeRequest } from "./config/metrics";
 
 const app = express();
 
-app.get('/metrics', metricsEndpoint);
+app.get("/metrics", metricsEndpoint);
 
 app.use(observeRequest);
 

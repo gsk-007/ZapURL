@@ -4,7 +4,7 @@ export function isValidUrlFormat(url: string): boolean {
   try {
     new URL(url); // Will throw an error if the format is invalid
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -13,7 +13,7 @@ export async function isUrlBroken(url: string): Promise<boolean> {
   try {
     const res = await fetch(url, { method: "HEAD" });
     return !res.ok;
-  } catch (error) {
+  } catch {
     return true;
   }
 }
